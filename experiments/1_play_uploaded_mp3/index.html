@@ -1,0 +1,90 @@
+<h1><a href="../../index.html">Mashup.Studio</a></h1>
+<h2>Experiment 1: Play an uploaded mp3 file</h2>
+
+<input id='track_uploader' type="file"></input>
+<input id='upload_track' type="submit"></input>
+<button id='play' type="button">Play</button>
+<button id='pause' type="button">Pause</button>
+<button id='stop' type="button">Stop</button>
+
+<script>
+  var context = new AudioContext();
+  var trackBuffer = null;
+  var uploadedSound = null;
+  document.getElementById('upload_track').onclick = handleFiles
+  document.getElementById('play').onclick = playAudio
+  document.getElementById('pause').onclick = pauseAudio
+  document.getElementById('stop').onclick = stopAudio
+
+  function handleFiles(event) {
+    var readFile = document.getElementById('track_uploader').files[0]
+    var reader;
+    try
+    {
+      reader = new FileReader();
+    }catch(e)
+    {
+      document.getElementById('output').innerHTML =
+        "Error: seems File API is not supported on your browser";
+      return;
+    }
+    reader.readAsArrayBuffer(readFile, "UTF-8");
+    // reader.onprogress = updateProgress;
+    reader.onload = loaded;
+    // reader.onerror = errorHandler;
+  }
+
+  function loaded(evt)
+  {
+    var fileContent = evt.target.result;
+
+    context.decodeAudioData(fileContent, function(buffer) {
+      // trackBuffer = buffer;
+      uploadedSound = sound(context, buffer);
+    }, errorHandler);
+  }
+
+  function errorHandler() {
+    console.log("ERROR")
+  }
+
+  function playAudio() {
+    uploadedSound.play();
+    // source = context.createBufferSource();
+    // source.buffer = trackBuffer;
+    // source.connect(context.destination);
+
+    // source.start(0);
+  }
+
+  function pauseAudio() {
+    uploadedSound.pause();
+  }
+  function stopAudio() {
+    uploadedSound.stop();
+  }
+
+  function sound(context, buffer) {
+    var audioContext = context;
+    var decodedDataBuffer = buffer;
+    var source = null;
+
+    play = function() {
+      source = audioContext.createBufferSource();
+      source.buffer = decodedDataBuffer;
+      source.connect(audioContext.destination);
+
+      source.start(0);
+    }
+
+    pause = function() {
+      console.log(source)
+    }
+
+    stop = function() {
+      source.stop();
+    }
+
+    return this;
+  }
+</script>
